@@ -36,29 +36,33 @@
 
 <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
 
-<p> In the first task, I performed point-in-triangle tests for each pixel within a range determined by x and y coordinates of the three vertices, regardless of the winding order of the vertices (i.e. clockwise or counter-clockwise).</p>
+<p> In the first task, I rasterized triangles in single color. <br>
+  First, I determined the maximum and minimum of x and y coordinates based on the coordinates of the three vertices. <br>
+  Then I only performed point-in-triangle tests for pixels within the range by plugging the coordinates of each pixel into a line function. <br>
+  Also, to take the winding order of the vertices (i.e. clockwise or counter-clockwise) into consideration, I checked both orders to include all pixels I need to rasterize. (All greater than 0 or all smaller than 0)
+</p>
 
 <div align="middle">
   <table style="width=100%">
     <tr>
       <td>
         <img src="task1-test3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <figcaption align="middle">task1-test3</figcaption>
       </td>
       <td>
-        <img src="images/image2.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="task1-test4.png" align="middle" width="400px"/>
+        <figcaption align="middle">task1-test4</figcaption>
       </td>
     </tr>
     <br>
     <tr>
       <td>
-        <img src="images/image3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="task1-test5.png" align="middle" width="400px"/>
+        <figcaption align="middle">task1-test5</figcaption>
       </td>
       <td>
-        <img src="images/image4.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="task1-test6.png" align="middle" width="400px"/>
+        <figcaption align="middle">task1-test6</figcaption>
       </td>
     </tr>
   </table>
@@ -67,22 +71,211 @@
 
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
 
+<p> In the second task, I implemented supersampling to antialias the triangles.<br>
+  First, I determined the range of x and y coordinates as in task 1.<br>
+  Second, I break down each pixel into sqrt(sample_rate) * sqrt(sample_rate) sub-pixels distributed over the pixel area.<br>
+  Then I saved the color of each sub pixel in to a sample buffer, <br>
+  and finally populate the framebuffer from the supersamples by averaging the colors of sub pixels.<br>
+  As shown in the images attatched below, higher sample rate leads to smoother edge of the triangle because we have more subpixels to help filter out high frequencies.
+</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="task2-sample_rate_1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task2 sample_rate = 1</figcaption>
+      </td>
+      <td>
+        <img src="task2-sample_rate_4.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task2 sample_rate = 4</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="task2-sample_rate_9.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task2 sample_rate = 9</figcaption>
+      </td>
+      <td>
+        <img src="task2-sample_rate_16.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task2 sample_rate = 16</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
 
 <h3 align="middle">Part 3: Transforms</h3>
 
+<p> In the third task, I built three matrices in homogeneous coordinates to perform translate, scale, and rotate operations.<br>
+  I created my new running robot by performing rotation on the legs and arms of the robot, and modify the coordinates of translate and scale operator to generate better visual effects.
+
+</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="task3.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task3 Robot</figcaption>
+      </td>
+      <td>
+        <img src="task3-myrobot.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task3 My Robot is running!</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
 
 <h2 align="middle">Section II: Sampling</h2>
 
+
 <h3 align="middle">Part 4: Barycentric coordinates</h3>
 
+<p> In the fourth task, I implemented a Barycentric coordinates generator.<br>
+  Barycentric coordinates is useful for interpolating across a triangle area and map correspond value to pixels inside the triangle (for example, color). <br>
+  To avoid a compiler bug, I computed all the three coordinates from scratch and did not use the formula lambda = 1 - alpha - beta.
+</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="task4-triangle.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task4 A smoothly blended color triangle</figcaption>
+      </td>
+      <td>
+        <img src="task4.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task4 Color Wheel</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+
+<p> In the fifth task, I implemented two texture sampling approach: nearest neighbor and bilinear interpolation.<br>
+  For this task, I focused on the full-resolution texture image with default level = 0.<br>
+  Pixel sampling is the mapping between screen space coordinates with a texture space UV coordinates.<br>
+  First, I found the Barycentric coordinates of each pixel inside the triangle and interpolate the UV coordinates of the vertices to get the UV coordinate for the pixel.<br>
+  <br> For the nearest neighbor interpolation, 
+  I multiplied the UV coordinate by (width - 1) and (height - 1) of the texture map at level 0 and rounded the coordinate to the nearest integer.
+  Then I used get_texels method to get the color at the specific coordinate on the texture map.<br>
+  <br> For the bilinear interpolation, I multiplied the UV coordinate by (width - 1) and (height - 1) of the texture map at level 0, 
+  and use ceil and floor function to generate the four surrounding texels and use get_texels function to get the four colors.
+  Then I took two horizontal lerps and one vertical lerp to get the color of the pixel I'm interested in.
+</p>
+Bilinear method is better at high frequency parts of the image and generates smoother lines than nearest neighbor does.
+The difference between nearest and bilinear methods is more clear when the sample rate is low, 
+because supersampling also helps with antialiasing by filtering out high frequencies.
+<p>
+
+</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="task5-n-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task5 Nearest Neighbor Sample rate = 1</figcaption>
+      </td>
+      <td>
+        <img src="task5-n-16.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task5 Nearest Neighbor Sample rate = 16</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="task5-bi-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task5 Bilinear Sample rate = 1</figcaption>
+      </td>
+      <td>
+        <img src="task5-bi-16.png" align="middle" width="400px"/>
+        <figcaption align="middle">Task5 Bilinear Sample rate = 16</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
 
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
+<p>
+  Level sampling is useful for antialiasing in texture mapping. <br>
+  The different levels are low-pass filters that filtering out frequencies that are too high for a specific pixel.<br>
+  I created various resolution levels for a texture (i.e. mipmap), 
+  and used the level sampling method I chose to select the desired level that has the proper resolution for each pixel in triangles.<br>
+  <br>
+  In RasterizerImp::rasterize_textured_triangle, first, I computed the Barycentric coordinates for (x, y), (x + 1, y), (x, y + 1) for each (x, y) in the triangle, 
+  and then interpolate the UV coordinates of the three vertices to get (u, v), (ux, vx), (uy, vy).<br>
+  Second, I set barycentric differentials in the SampleParams struct S as S.p_dx_uv = (ux, vx),  S.p_dx_uv = (uy, vy).<br>
+  Also, I set S.lsm = lsm to get the customized level sampling method.<br>
+  Third, with the SampleParams properly setted, I fill the pixel with the color returned by texture.sample(S).<br>
+  <br>
+  In Texture::sample, first I got the float number level by calling get_level on the SampleParams struct S, 
+  then convert the level into integer(s) to match mipmap images in that level.<br>
+  For L_ZERO, I simply set level to be 0 and use S.psm to return the color as in Task 5.<br>
+  For L_NEAREST, I rounded the level to the nearest integer that is in the range of 0 to the size of mitmap, 
+  and then return the color sampled by S.psm.<br>
+  For L_LINEAR, I get the floor and ceil of level and clamped them into the range of 0 to the size of mitmap, 
+  and then use linear interpolation to return the color based on the colors sampled by S.psm at the floor and ceil levels.<br>
+  <br>
+  In Texture::get_level, I calculated the difference vectors p_dx_uv - p_uv and p_dy_uv - p_uv and multiplied them by the width and height of the level 0 mipmap respectively, as in task 5,<br>
+  Then I assigned L to be the maximum norm of the two updated vectors, and return log2(L) as the level we should choose.
+</p>
+
+<p>
+  <h5 align = "left"> Speed:</h6>
+  Pixel Sampling: Nearest Neighbor is faster than Bilinear Interpolation. <br>
+  Level Sampling: Level Zero is the fasted. The Nearest method has to compute the mipmap level, 
+  so it is a little bit slower to Level Zero in speed. 
+  Bilinear method is the slowest one, because it has to do linear interpolation between the colors from two levels of mipmap.<br>
+  Supersampling: The samller the sample rate is, the faster the speed is.
+</p>
+
+<p>
+  <h5 align = "left"> Memory Usage:</h6>
+  Pixel Sampling: Bilinear Interpolation needs slightly more memory than Nearest Neighbor to store colors from four texels to do linear interpolation. <br>
+  Level Sampling: Memory used by Level Zero is the least. Nearest and Bilinear method use slightly more memory than Level Zero method does, 
+  because they have mipmap, which uses about 4/3 times the memory needed to store a full resolution image.<br>
+  Supersampling: Memory usage scales linearly with the sample rate. The samller the sample rate is, the less the memory usage is.
+</p>
+
+<p>
+  <h5 align = "left"> Antialiasing Power:</h6>
+  Pixel Sampling: Bilinear Interpolation has greater antialiasing power than Nearest neighbor.<br>
+  Level Sampling: Bilinear > Nearest > Level Zero. <br>
+  Supersampling: Large sample rate has greater antialiasing power.
+</p>
+
+</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="task6-0-n.png" align="middle" width="400px"/>
+        <figcaption align="middle">lsm = L_ZERO; psm = P_NEAREST</figcaption>
+      </td>
+      <td>
+        <img src="task6-0-l.png" align="middle" width="400px"/>
+        <figcaption align="middle">lsm = L_ZERO; psm = P_LINEAR</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="task6-n-n.png" align="middle" width="400px"/>
+        <figcaption align="middle">lsm = L_NEAREST; psm = P_NEAREST</figcaption>
+      </td>
+      <td>
+        <img src="task6-n-l.png" align="middle" width="400px"/>
+        <figcaption align="middle">lsm = L_NEAREST; psm = P_LINEAR</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
 
 <h2 align="middle">Section III: Art Competition</h2>
