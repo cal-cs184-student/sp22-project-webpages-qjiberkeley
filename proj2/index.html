@@ -28,347 +28,350 @@
 
 <body>
 
-  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2020</h1>
-  <h1 align="middle">Project 2: Mesh Editor</h1>
-  <h2 align="middle">Qingsong Ji, CS184-qji2</h2>
+    <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2020</h1>
+    <h1 align="middle">Project 2: Mesh Editor</h1>
+    <h2 align="middle">Qingsong Ji, CS184-qji2</h2>
+    <h3 align="middle">https://cal-cs184-student.github.io/sp22-project-webpages-qjiberkeley/proj2/index.html</h3>
 
-  <br><br>
+    <br /><br />
 
-      <div>
+    <div>
 
-          <h2 align="middle">Overview</h2>
-          <p>
-              This project focuses on geometric modeling. <br />
-              First, I built Bezier curves and surfaces using de Casteljau algorithm.<br />
-              Then I moved on to manipulating triangle meshes through half-edge data structure, <br />
-              and implemented loop subdivision to get smoother surface.
-          </p>
+        <h2 align="middle">Overview</h2>
+        <p>
+            This project focuses on geometric modeling. <br />
+            First, I built Bezier curves and surfaces using de Casteljau algorithm.<br />
+            Then I moved on to manipulating triangle meshes through half-edge data structure, <br />
+            and implemented loop subdivision to get smoother surface.
+        </p>
 
-          <h2 align="middle">Section I: Bezier Curves and Surfaces</h2>
+        <h2 align="middle">Section I: Bezier Curves and Surfaces</h2>
 
-          <h3 align="middle">Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
+        <h3 align="middle">Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
 
-          <p>
-              The de Casteljau method performs linearly interpolates recursively between every pair of two adjacent control points
-              with parameter t, until it reaches a single point.<br />
-              We notice that a Bezeir curve of degree n needs n+1 control points.<br />
-              Also, t is in [0, 1].
-          </p>
+        <p>
+            The de Casteljau method performs linearly interpolates recursively between every pair of two adjacent control points
+            with parameter t, until it reaches a single point.<br />
+            We notice that a Bezeir curve of degree n needs n+1 control points.<br />
+            Also, t is in [0, 1].
+        </p>
 
-          <p>
-              Bezier curve with 6 control points:
-          </p>
+        <p>
+            Bezier curve with 6 control points:
+        </p>
 
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part1-1.png" align="middle" width="400px" />
-                          <figcaption align="middle">Step 1</figcaption>
-                      </td>
-                      <td>
-                          <img src="part1-2.png" align="middle" width="400px" />
-                          <figcaption align="middle">Step 2</figcaption>
-                      </td>
-                  </tr>
-                  <br />
-                  <tr>
-                      <td>
-                          <img src="part1-3.png" align="middle" width="400px" />
-                          <figcaption align="middle">Step 3</figcaption>
-                      </td>
-                      <td>
-                          <img src="part1-4.png" align="middle" width="400px" />
-                          <figcaption align="middle">Step 4</figcaption>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>
-                          <img src="part1-5.png" align="middle" width="400px" />
-                          <figcaption align="middle">Step 5</figcaption>
-                      </td>
-                      <td>
-                          <img src="part1-6.png" align="middle" width="400px" />
-                          <figcaption align="middle">Move the green control point</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
-
-
-          <h3 align="middle">Part 2: Bezier surfaces with separable 1D de Casteljau subdivision</h3>
-          <p>
-              how you implemented it in order to evaluate Bezier surfaces.
-
-              We can evaluate a surface position corresponding to parameters (u, v).<br />
-              First, we can use de Casteljau to evaluate point u on each row to get the Bezier curves in u.<br />
-              Let r be the number of rows, then this gives r control points for the "moving" Bezier curve.<br />
-              Then we use 1D de Casteljau to evaluate point v on th moving curve.<br />
-              In this way, we could extend de Casteljau algorithm to Bezier surfaces.
-          </p>
-
-          <p>
-              <h4 align="left">Vector3D BezierPatch::evaluate(double u, double v) const</h4>
-              Use a for loop to iterate through each row of the control points.<br />
-              In the for loop, call evaluate1D with the current row and u to get the evaluated point on this row,<br />
-              and store it into a vector called "result".<br />
-              After I evaluated each row, I called evaluated1D on result and v to return the final Bezeir Surface.<br />
-              <h4 align="left">Vector3D BezierPatch::evaluate1D(std::vector<Vector3D> const& points, double t) const</Vector3D></h4>
-              Recursively call evaluate1D(evaluateStep(points, t), t) until there is only one point remained.<br />
-              <h4 align="left">Vector3D BezierPatch::evaluate(double u, double v) const</h4>
-              Use for loop to perform lerp on each pair of adjacent control points to evaluate one step of the de Casteljau's algorithm.
-          </p>
-
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part2-tree.jpg" align="middle" width="400px" />
-                          <figcaption align="middle">A lerp tree from my lecture notes</figcaption>
-                      </td>
-                      <td>
-                          <img src="part2.png" align="middle" width="400px" />
-                          <figcaption align="middle">bez/teapot.bez evaluated by my implementation</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
-
-          <br />
-          <br />
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part1-1.png" align="middle" width="400px" />
+                        <figcaption align="middle">Step 1</figcaption>
+                    </td>
+                    <td>
+                        <img src="part1-2.png" align="middle" width="400px" />
+                        <figcaption align="middle">Step 2</figcaption>
+                    </td>
+                </tr>
+                <br />
+                <tr>
+                    <td>
+                        <img src="part1-3.png" align="middle" width="400px" />
+                        <figcaption align="middle">Step 3</figcaption>
+                    </td>
+                    <td>
+                        <img src="part1-4.png" align="middle" width="400px" />
+                        <figcaption align="middle">Step 4</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="part1-5.png" align="middle" width="400px" />
+                        <figcaption align="middle">Step 5</figcaption>
+                    </td>
+                    <td>
+                        <img src="part1-6.png" align="middle" width="400px" />
+                        <figcaption align="middle">Move the green control point</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
 
-          <h2 align="middle">Section II: Sampling</h2>
+        <h3 align="middle">Part 2: Bezier surfaces with separable 1D de Casteljau subdivision</h3>
+        <p>
+            how you implemented it in order to evaluate Bezier surfaces.
 
-          <h3 align="middle">Part 3: Average normals for half-edge meshes</h3>
-          <p>
-              I used a while loop to iterate through all the neighbor triangles.<br />
-              If the current face is not a boundary face,
-              I found the other two vertices v1 and v2 using Halfedge next and twin operations,<br />
-              and calculate the area of the triangle as area = (cross(v1 - v, v2 - v).norm()) / 2.<br />
-              Then I add area times the normal of the current face into weighted_normal.
-              After the while loop ends, I normalized the weighted_normal and return the unit vector as the vertex normal.
-          </p>
+            We can evaluate a surface position corresponding to parameters (u, v).<br />
+            First, we can use de Casteljau to evaluate point u on each row to get the Bezier curves in u.<br />
+            Let r be the number of rows, then this gives r control points for the "moving" Bezier curve.<br />
+            Then we use 1D de Casteljau to evaluate point v on th moving curve.<br />
+            In this way, we could extend de Casteljau algorithm to Bezier surfaces.
+        </p>
 
+        <p>
+            <h4 align="left">Vector3D BezierPatch::evaluate(double u, double v) const</h4>
+            Use a for loop to iterate through each row of the control points.<br />
+            In the for loop, call evaluate1D with the current row and u to get the evaluated point on this row,<br />
+            and store it into a vector called "result".<br />
+            After I evaluated each row, I called evaluated1D on result and v to return the final Bezeir Surface.<br />
+            <h4 align="left">Vector3D BezierPatch::evaluate1D(std::vector<Vector3D> const& points, double t) const</Vector3D></h4>
+            Recursively call evaluate1D(evaluateStep(points, t), t) until there is only one point remained.<br />
+            <h4 align="left">Vector3D BezierPatch::evaluate(double u, double v) const</h4>
+            Use for loop to perform lerp on each pair of adjacent control points to evaluate one step of the de Casteljau's algorithm.
+        </p>
 
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part3-1.png" align="middle" width="400px" />
-                          <figcaption align="middle">default flat shading</figcaption>
-                      </td>
-                      <td>
-                          <img src="part3-2.png" align="middle" width="400px" />
-                          <figcaption align="middle">Phong shading</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part2-tree.jpg" align="middle" width="400px" />
+                        <figcaption align="middle">A lerp tree from my lecture notes</figcaption>
+                    </td>
+                    <td>
+                        <img src="part2.png" align="middle" width="400px" />
+                        <figcaption align="middle">bez/teapot.bez evaluated by my implementation</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-          <h3 align="middle">Part 4: Half-edge flip</h3>
-          <p>
-              First, I checked whether the edge is on the boundary. If it is, then I just return itself.<br />
-              If not, I start flipping the edge as following.
-              The flipping operation can be considered as rotating the inner halfedges counterclockwisely.
-              So we can draw some diagrams to show the change in the triangle.
-          </p>
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part4-before.png" align="middle" width="400px" />
-                      </td>
-                      <td>
-                          <img src="part4-after.png" align="middle" width="400px" />
-                      </td>
-                  </tr>
-              </table>
-          </div>
-          <p>From http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf</p>
-          <p>
-              For every element in the modified mesh, including vertices, halfedges, edges, and faces,
-              I set all of its pointers to the correct element in the modified mesh.<br />
-              For each half-edge, I updated its next, twin, vertex, edge, and face pointer to the correct element using Halfedge::setNeighbors(...).<br />
-              Then for each vertex, edge, and face, I set its halfedge pointer.<br />
-              Finally, I return the updated e0.
-          </p>
-
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part4-1.png" align="middle" width="400px" />
-                          <figcaption align="middle">Before Edge Flipping</figcaption>
-                      </td>
-                      <td>
-                          <img src="part4-2.png" align="middle" width="400px" />
-                          <figcaption align="middle">After Edge Flipping</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
+        <br />
+        <br />
 
 
-          <h3 align="middle">Part 5: Half-edge split</h3>
-          <p>
-              The implementation for this part is very similar to part 4 implementation.
-              First, I checked whether the edge is on the boundary. If it is, then I just return itself.<br />
-              If not, I start flipping the edge as following.
-              I created 1 new vertex, 3 new edges, 6 new half-edges, and 2 new faces.<br />
-              For every element in the modified mesh, including vertices, halfedges, edges, and faces,
-              I set all of its pointers to the correct element in the modified mesh.<br />
-              For each half-edge, I updated its next, twin, vertex, edge, and face pointer to the correct element using Halfedge::setNeighbors(...).<br />
-              Then for each vertex, edge, and face, I set its halfedge pointer.<br />
-              Also, I set "isNew" to be true for two new edges.
-              Finally, I return the new vertex.
-          </p>
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part5-1.png" align="middle" width="300px" />
+        <h2 align="middle">Section II: Sampling</h2>
 
-                      </td>
-                      <td>
-                          <img src="part5-2.png" align="middle" width="300px" />
-                          <figcaption align="middle">after some edge splits</figcaption>
-                      </td>
-                      <td>
-                          <img src="part5-3.png" align="middle" width="300px" />
-                          <figcaption align="middle">after a combination of both edge splits and edge flips</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
+        <h3 align="middle">Part 3: Average normals for half-edge meshes</h3>
+        <p>
+            I used a while loop to iterate through all the neighbor triangles.<br />
+            If the current face is not a boundary face,
+            I found the other two vertices v1 and v2 using Halfedge next and twin operations,<br />
+            and calculate the area of the triangle as area = (cross(v1 - v, v2 - v).norm()) / 2.<br />
+            Then I add area times the normal of the current face into weighted_normal.
+            After the while loop ends, I normalized the weighted_normal and return the unit vector as the vertex normal.
+        </p>
 
 
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part3-1.png" align="middle" width="400px" />
+                        <figcaption align="middle">default flat shading</figcaption>
+                    </td>
+                    <td>
+                        <img src="part3-2.png" align="middle" width="400px" />
+                        <figcaption align="middle">Phong shading</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">Part 4: Half-edge flip</h3>
+        <p>
+            First, I checked whether the edge is on the boundary. If it is, then I just return itself.<br />
+            If not, I start flipping the edge as following.
+            The flipping operation can be considered as rotating the inner halfedges counterclockwisely.
+            So we can draw some diagrams to show the change in the triangle.
+        </p>
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part4-before.png" align="middle" width="400px" />
+                    </td>
+                    <td>
+                        <img src="part4-after.png" align="middle" width="400px" />
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p>From http://15462.courses.cs.cmu.edu/fall2015content/misc/HalfedgeEdgeOpImplementationGuide.pdf</p>
+        <p>
+            For every element in the modified mesh, including vertices, halfedges, edges, and faces,
+            I set all of its pointers to the correct element in the modified mesh.<br />
+            For each half-edge, I updated its next, twin, vertex, edge, and face pointer to the correct element using Halfedge::setNeighbors(...).<br />
+            Then for each vertex, edge, and face, I set its halfedge pointer.<br />
+            Finally, I return the updated e0.
+        </p>
+
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part4-1.png" align="middle" width="400px" />
+                        <figcaption align="middle">Before Edge Flipping</figcaption>
+                    </td>
+                    <td>
+                        <img src="part4-2.png" align="middle" width="400px" />
+                        <figcaption align="middle">After Edge Flipping</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
 
-          <br />
-          <br />
+        <h3 align="middle">Part 5: Half-edge split</h3>
+        <p>
+            The implementation for this part is very similar to part 4 implementation.
+            First, I checked whether the edge is on the boundary. If it is, then I just return itself.<br />
+            If not, I start flipping the edge as following.
+            I created 1 new vertex, 3 new edges, 6 new half-edges, and 2 new faces.<br />
+            For every element in the modified mesh, including vertices, halfedges, edges, and faces,
+            I set all of its pointers to the correct element in the modified mesh.<br />
+            For each half-edge, I updated its next, twin, vertex, edge, and face pointer to the correct element using Halfedge::setNeighbors(...).<br />
+            Then for each vertex, edge, and face, I set its halfedge pointer.<br />
+            Also, I set "isNew" to be true for two new edges.
+            Finally, I return the new vertex.
+        </p>
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part5-1.png" align="middle" width="300px" />
 
-          <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
-          <p>
-              First, I used for loop to compute new positions for all the vertices in the input mesh,
-              stored them in Vertex::newPosition, and marked "isNew" to be false for all of them.<br />
-              Second, I iterated through all the edges in the mesh,
-              computed the midpoint vertex positions associated with edges, store it in Edge::newPosition,
-              and marked "isNew" to be false for all of them.<br />
-              Third, I splited every old edge in the mesh byb calling VertexIter HalfedgeMesh::splitEdge(EdgeIter e0)
-              and update "isNew" for new edges in this function to avoid infinite loop.<br />
-              Fourth, I flipped any new edge that connects an old and new vertex by calling VertexIter HalfedgeMesh::splitEdge(EdgeIter e0).<br />
-              Finally, I used a for loop to copy all the new vertex positions into final Vertex::position
-              and set "isNew" to be false for all the vertices.
-          </p>
-          <p>
-              As we apply more iterations of loop subdivision on a mesh,<br />
-              the surface on it will become smoother and smoother,<br />
-              and sharp corners and edges will be smoothed out
-          </p>
-          <br />
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part6-0.png" align="middle" width="400px" />
-                          <figcaption align="middle">Original Mesh</figcaption>
-                      </td>
-                      <td>
-                          <img src="part6-1.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 1 iteration of loop subdivision</figcaption>
-                      </td>
-                  </tr>
-                  <br />
-                  <tr>
-                      <td>
-                          <img src="part6-2.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 2 iterations of loop subdivision</figcaption>
-                      </td>
-                      <td>
-                          <img src="part6-3.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 3 iterations of loop subdivision</figcaption>
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>
-                          <img src="part6-4.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 4 iterations of loop subdivision</figcaption>
-                      </td>
-                      <td>
-                          <img src="part6-5.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 5 iterations of loop subdivision</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
-          <br />
-          <p>
-              The cube becomes asymmetric after repeated subdivisions
-              because the diagonal edges on each face of the original cube is not symmetric.<br />
-              If we use flip and/or split to make each face of the original cube have symmetric edges,
-              we could get symmetric cube after loop subdivisions.<br />
-              In the following example, I split the diagonal edge on each face and then perform loop subdivision.
-          </p>
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part6-01.png" align="middle" width="400px" />
-                          <figcaption align="middle">Splitted the diagonal edges.</figcaption>
-                      </td>
-                      <td>
-                          <img src="part6-11.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 1 iteration of loop subdivision</figcaption>
-                      </td>
-                  </tr>
-                  <br />
-                  <tr>
-                      <td>
-                          <img src="part6-21.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 2 iterations of loop subdivision</figcaption>
-                      </td>
-                      <td>
-                          <img src="part6-31.png" align="middle" width="400px" />
-                          <figcaption align="middle">after 3 iterations of loop subdivision</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
-          <br />
-          <br />
+                    </td>
+                    <td>
+                        <img src="part5-2.png" align="middle" width="300px" />
+                        <figcaption align="middle">after some edge splits</figcaption>
+                    </td>
+                    <td>
+                        <img src="part5-3.png" align="middle" width="300px" />
+                        <figcaption align="middle">after a combination of both edge splits and edge flips</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-          <h2 align="middle">Section III: Optional Extra Credit</h2>
-          <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
 
-          <h3 align="middle">Part 7: Design your own mesh!</h3>
 
-          <p>Here is my partsevenmodel.dae in docs folder:</p>
-          <div align="middle">
-              <table style="width=100%">
-                  <tr>
-                      <td>
-                          <img src="part7.png" align="middle" width="500px" />
-                      </td>
-                      <td>
-                          <img src="part7-0.png" align="middle" width="300px" />
-                          <figcaption align="middle">Rendered in GUI</figcaption>
-                      </td>
-                  </tr>
-              </table>
-          </div>
-          </br>
 
-          <p>I made a mobius band in Blender. <br />
-          First I add a circle and set the handle type to be "free".<br />
-          Then I deleted one handle and add a new one with rotation 90 degrees in z-axis.<br />
-          Then I modified the geometry data to convert the 1D line in to a 3D strip shape.<br />
-          After that I tilted each of the four handle by 45, 90, 135, and 180 degrees respectively.<br />
-          Now I get the mobius band and converted the curve into a mesh.
-          Since we are using triangular modeling method, I need to add a modifier to the mesh to triangularize it.<br />
-          Finally, I export it as a .dae file and loaded into the GUI.
-          </p>
+        <br />
+        <br />
 
-      </div></body>
+        <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
+        <p>
+            First, I used for loop to compute new positions for all the vertices in the input mesh,
+            stored them in Vertex::newPosition, and marked "isNew" to be false for all of them.<br />
+            Second, I iterated through all the edges in the mesh,
+            computed the midpoint vertex positions associated with edges, store it in Edge::newPosition,
+            and marked "isNew" to be false for all of them.<br />
+            Third, I splited every old edge in the mesh byb calling VertexIter HalfedgeMesh::splitEdge(EdgeIter e0)
+            and update "isNew" for new edges in this function to avoid infinite loop.<br />
+            Fourth, I flipped any new edge that connects an old and new vertex by calling VertexIter HalfedgeMesh::splitEdge(EdgeIter e0).<br />
+            Finally, I used a for loop to copy all the new vertex positions into final Vertex::position
+            and set "isNew" to be false for all the vertices.
+        </p>
+        <p>
+            As we apply more iterations of loop subdivision on a mesh,<br />
+            the surface on it will become smoother and smoother,<br />
+            and sharp corners and edges will be smoothed out
+        </p>
+        <br />
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part6-0.png" align="middle" width="400px" />
+                        <figcaption align="middle">Original Mesh</figcaption>
+                    </td>
+                    <td>
+                        <img src="part6-1.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 1 iteration of loop subdivision</figcaption>
+                    </td>
+                </tr>
+                <br />
+                <tr>
+                    <td>
+                        <img src="part6-2.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 2 iterations of loop subdivision</figcaption>
+                    </td>
+                    <td>
+                        <img src="part6-3.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 3 iterations of loop subdivision</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="part6-4.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 4 iterations of loop subdivision</figcaption>
+                    </td>
+                    <td>
+                        <img src="part6-5.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 5 iterations of loop subdivision</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br />
+        <p>
+            The cube becomes asymmetric after repeated subdivisions
+            because the diagonal edges on each face of the original cube is not symmetric.<br />
+            If we use flip and/or split to make each face of the original cube have symmetric edges,
+            we could get symmetric cube after loop subdivisions.<br />
+            In the following example, I split the diagonal edge on each face and then perform loop subdivision.
+        </p>
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part6-01.png" align="middle" width="400px" />
+                        <figcaption align="middle">Splitted the diagonal edges.</figcaption>
+                    </td>
+                    <td>
+                        <img src="part6-11.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 1 iteration of loop subdivision</figcaption>
+                    </td>
+                </tr>
+                <br />
+                <tr>
+                    <td>
+                        <img src="part6-21.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 2 iterations of loop subdivision</figcaption>
+                    </td>
+                    <td>
+                        <img src="part6-31.png" align="middle" width="400px" />
+                        <figcaption align="middle">after 3 iterations of loop subdivision</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br />
+        <br />
+
+        <h2 align="middle">Section III: Optional Extra Credit</h2>
+        <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
+
+        <h3 align="middle">Part 7: Design your own mesh!</h3>
+
+        <p>Here is my partsevenmodel.dae in docs folder:</p>
+        <div align="middle">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                        <img src="part7.png" align="middle" width="500px" />
+                    </td>
+                    <td>
+                        <img src="part7-0.png" align="middle" width="300px" />
+                        <figcaption align="middle">Rendered in GUI</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        </br>
+
+        <p>
+            I made a mobius band in Blender. <br />
+            First I add a circle and set the handle type to be "free".<br />
+            Then I deleted one handle and add a new one with rotation 90 degrees in z-axis.<br />
+            Then I modified the geometry data to convert the 1D line in to a 3D strip shape.<br />
+            After that I tilted each of the four handle by 45, 90, 135, and 180 degrees respectively.<br />
+            Now I get the mobius band and converted the curve into a mesh.
+            Since we are using triangular modeling method, I need to add a modifier to the mesh to triangularize it.<br />
+            Finally, I export it as a .dae file and loaded into the GUI.
+        </p>
+
+    </div>
+</body>
 
 </html>
