@@ -1,7 +1,204 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title> Qingsong Ji  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer</h1>
+    <h2 align="middle">Qingsong Ji</h2>
+
+    <div class="padded">
+        <p>
+            In this project, I continued working on ray tracing in Project 3-1.<br />
+            In Part 1, I implemented more complex BSDF materials such as mirror and glass
+            with specific reflection and refraction rules. <br />
+            In Part 4, I simulated a thin lens to enable the depth of field effect.<br />
+            After I finished this part, I could focus on certain parts of the image
+            by setting specific lens radius and focal distance.<br />
+
+        </p>
+
+        <h2 align="middle"> Part 1: Mirror and Glass Materials </h2>
+        <p>
+            First, I implemented the BSDF::reflect() function.<br />
+            Since I am using the origin as the intersection point and using the z axis as the normal vector,<br />
+            I could just assign wi to be (-wo.x, -wo.y, wo.z).<br />
+            <br />
+            Second, I implemented MirrorBSDF::sample_f() using my BSDF::reflect() function.<br />
+            Because it is a delta BSDF, I set pdf equal to 1.
+            Also, because ideal mirror reflection only change the direction of the ray without any Lambertian falloff,<br />
+            I need to cancel out the cosine from the at_least_one_bounce_radiance function
+            and return reflectance / abs_cos_theta(*wi).
+            <br />
+            Third, I implemented BSDF::refract() for the glass refraction.<br />
+            I determined eta and the sign(+-) of wi.z based on the sign(+-) of wo.z.<br />
+            Then I calculated 1.0 - eta * eta * (1.0 - cos_theta(wo) * cos_theta(wo)) and reture false if it is negative,
+            which means that refraction does not happen due to total internal reflection.<br />
+            Otherwise, I set the coordinates of wi as following and normalize it:<br />
+            wi->x = -eta * wo.x;<br />
+            wi->y = -eta * wo.y;<br />
+            wi->z = sign * sqrt(wiz2);<br />
+            Finally, I return true.
+            After that, I filled in the RefractionBSDF::sample_f() with BSDF::refract.<br />
+            I set pdf to 1 as in MirrorBSDF::sample_f() and assign eta with correct value as in BSDF::refract().<br />
+            If refract(wo, wi, ior) returns false, then I just return an empty vector.<br />
+            Otherwise, I return transmittance / abs_cos_theta(*wi) / eta / eta,
+            cancelling out the Lambertian cosine like in the mirror BSDF.
+            <br />
+            Fourth, I implemented GlassBSDF::sample_f()
+            with Schlick's approximation to decide the ratio of the reflection energy to the refraction energy.<br />
+            If refract(wo, wi, ior) returns false (i.e., total internal reflection),
+            assign the reflection of wo to *wi, set the *pdf to 1, and return reflectance / abs_cos_theta(*wi).<br />
+            Else, compute Schlick's reflection coefficient R and flip a coin based on R.<br />
+            If coin_flip(R) returns true,
+            assign the reflection of wo to *wi, set the *pdf to R, and return R * reflectance / abs_cos_theta(*wi).<br />
+            Otherwise, assign the refraction of wo to *wi, set the *pdf to 1-R,
+            and return (1-R) * transmittance / abs_cos_theta(*wi) / eta^2.<br />
+            <br />
+        </p>
+        <p>Show a sequence of six images of scene CBspheres.dae rendered with max_ray_depth set to 0, 1, 2, 3, 4, 5, and 100.</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/0.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 0; we can only see the light source.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/1.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 1; no contribution from reflection or refraction; we can see the light source and the walls but not the spheres and the ceiling. </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/2.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 2; we can see the reflection in the mirror sphere and a much dimmer reflection in the glass sphere; the ceiling in the reflection of the spheres is black.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/3.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 3; we can see the refraction in the glass sphere; the ceiling in the reflection is brighter; but the reflection of mirror sphere contains a black glass sphere.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/4.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 4; the ceiling and the glass sphere in reflection become bright; the glass sphere is lighting up its shadow; also a small bright spot occurs on the blue wall.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/5.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 5; the image becomes brighter and the refraction on the wall is more visible.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/100.png" width="480px" />
+                        <figcaption align="middle">max_ray_depth = 100; the image is brighter and less noisy.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+
+
+        <h2 align="middle"> Part 4: Depth of Field </h2>
+        <p>
+            The differences between a pinhole camera model and a thin-lens camera model:<br />
+            In a pin-hole camera, everything is in focus. <br />
+            In a thin-lens camera with finite apertures, objects are in focus only if they're within the focal plane.<br />
+            Setting lens radius of a thin-lens camera to zero will reduce to a pinhole camera.<br />
+            With a thin lens, pFilm receives radiance from any point on the thin lens, not just from (0, 0, 0).<br />
+            So we need to uniformly sample the lens.<br />
+            <br />
+        </p>
+
+        <p>
+            To simulate a thin lens, I first figured out the red ray's direction
+            and uniformly sample the disk representing the thin lens
+            with rndR and rndTheta to get pLens and pFocus.<br />
+            pLens is the origin of the blue ray.<br />
+            Then I calculated the direction of the blue ray as pFocus - pLens and normalized it.<br />
+            After that, I converted the origin and the direction of the blue ray from camera to world space
+            and add pos to the blue ray's origin.<br />
+            Finally, I set the near and far clips to be the min_t and max_t of the blue ray and return the blue ray.
+            <br />
+        </p>
+
+        <p>
+            Show a "focus stack" where you focus at 4 visibly different depths through a scene.<br />
+            Aperture Size = 0.2<br />
+            CBdragon.dae <br />
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/4.5d.png" width="480px" />
+                        <figcaption align="middle"> Focal Distance = 4.5 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/4.75d.png" width="480px" />
+                        <figcaption align="middle"> Focal Distance = 4.75 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/5d.png" width="480px" />
+                        <figcaption align="middle"> Focal Distance = 5.0 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/5.25d.png" width="480px" />
+                        <figcaption align="middle"> Focal Distance = 5.25 </figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>
+            Show a sequence of 4 pictures with visibly different aperture sizes,
+            all focused at the same point in a scene.
+            Focal Distance = 4.75<br />
+            CBdragon.dae <br />
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/0.01a.png" width="480px" />
+                        <figcaption align="middle"> Aperture Size = 0.01 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/0.1a.png" width="480px" />
+                        <figcaption align="middle"> Aperture Size = 0.1 </figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/0.2a.png" width="480px" />
+                        <figcaption align="middle"> Aperture Size = 0.2 </figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/0.3a.png" width="480px" />
+                        <figcaption align="middle"> Aperture Size = 0.3 </figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+</body>
 </html>
+
+
+
+
