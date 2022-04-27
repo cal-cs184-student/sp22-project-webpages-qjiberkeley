@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: left;
+      font-weight: 300;
+      font-family: 'Open Sans', sans-serif;
+      color: #121212;
+    }
+
+    dl {
+        display: block;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+  </style>
+  <title>CS184 Final Project</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+  <h1 align="middle">Final Project Milestone Status Report</h1>
+  <h2 align="middle">Team 5: Qingsong Ji, Lauren Leung, Shuyao Zhou, and Haodi Zou</h2>
+
+  <br><br>
+
+  <p>
+	Link to video: https://drive.google.com/file/d/1k_l35KeXd6B1bP2wMsNHEkOelZfgoB1t/view?usp=sharing
+  <br>
+  Link to slides: https://docs.google.com/presentation/d/1Zuope9w3QhNT1F5pjE6fqb9GaM8ciHaGVDKPrOcnfFQ/edit?usp=sharing
+  </p>
+
+  <div>
+
+    <h2 align="middle">Overview</h2>
+    <p>
+    </p>
+
+    <h2 align="middle">Part 1: Tracing Rays through Lenses</h2>
+	<h4 align="middle">Task 1: Tracing</h4>
+
+	<dl>
+		<dt>LensElement::pass_through</dt>
+		<dd>This function determines three things: 1. 
+			It decides whether the ray has intersection with the spherical lens element by calling intersect(...). 
+			2. If the ray intersects with the lens, then, we need to make sure that the intersection point is NOT farther than aperture/2 away from the z-axis. 
+			3. It refracts the ray using Snell’s law by calling refract(...). In this step, it also updates prev_ior to ior. (ior is the index of refraction. Air has an ior of 1).</dd>
+	</dl>
+
+  <dl>
+    <dt>LensElement::intersect</dt>
+		<dd>Given a ray, we need to determine its intersection with the spherical lens element.
+			 We can calculate t using quadratic formula and pick its correct quadratic root by testing r.d.z * radius > 0 ? t1 : t2 (assuming t1 less than t2). 
+			 Additionally, t has to be in the range(min_t and max_t) to be valid. Then, we can assign the intersection point to be P = o+t*d.	</dd>			
+  </dl>
+
+  <dl>
+    <dt>LensElement::refract</dt>
+		<dd>Refraction is complex for compound lenses. This function refracts the ray with this lens element unless the lens radius is 0. 
+			We need to consider both backward and forward rays. When a ray is backward, we need to flip the ratio of prev_ior/ior and the normal. 
+			One thing to keep in mind is we always need to normalize a vector.</dd>
+  </dl>
+
+  <dl> 
+    <dt>Tracing Functions</dt>
+		<dd>We implemented Lens::trace and Lens::trace_backwards to enable ray tracing from the sensor out into the world as well as from the world backwards through the lens towards the sensor.</dd>
+  </dl>
+
+	<p> Here are the lenstester results for four configurations of lenses.
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/lenstester1.png" align="middle" width="300px" />
+			  <figcaption align="middle">Lens 1: D-Gauss lens</figcaption>
+			</td>
+			<td>
+			  <img src="images/lenstester2.png" align="middle" width="300px" />
+			  <figcaption align="middle">Lens 2: Wide-angle lens</figcaption>
+			</td>
+			<td>
+			  <img src="images/lenstester4.png" align="middle" width="300px" />
+			  <figcaption align="middle">Lens 4: Fisheye lens</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/lenstester3.png" align="middle" width="900px" />
+          <figcaption align="middle">Lens 3: Telephoto lens</figcaption>
+        </td>
+        </tr>
+    </table>
+  </div>
+	<br>
+  
+  <h4 align="middle">Task 2: Lens and LensCamera helper functions</h4>
+
+    <dl>
+        <dt>Lens::set_focus_params</dt>
+        <dd>
+            The parameters of four types of lenses are computed below:
+        </dd>
+    </dl>
+    <div align="center">
+        <table style="width=100%">
+            <tr>
+                <td align="middle">
+                    <img src="images/params.png" width="600px" />
+                </td>
+            </tr>
+        </table>
+    </div> 
+
+    <dl>
+      <dt>Lens::focus_depth</dt>
+      <dd>
+         This function is used to find the conjugate of a ray starting from the sensor at depth d.
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Lens::back_lens_sample()</dt>
+      <dd>
+        We build this sampler to randomly sample a point on the 2D circle of the back of the lens 
+        element nearest the sensor by generating a random radius and angle of the sampled point.
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>LensCamera::generate_ray</dt>
+      <dd>
+        In this function, we generate a ray from the sensor pixel (x,y) pointing toward a point returned by back_lens_sample and traces the ray through the Lens to the world.
+        <br>
+        Besides the basic functionalities, we also implemented some methods to optimize the performance. The noise reduction algorithm is used for generating rays multiple times and recording the number of rays trying to get correct ray weighting for PathTracer::raytrace_pixel.
+        <br>
+        Also, we include the correct cosine factor and deal with invalid rays by setting the cosine factor to 0.
+        <br>
+        (Note: for the noise reduction and cosine factor part, we also updated PathTracer::raytrace_pixel and Camera::generate_ray accordingly)
+      </dd>
+    </dl>
+
+    <dl>
+      <dt>Pathtracer Rendering Result</dt>
+      <dd>
+        See “Part 2: Contrast-based Autofocus: without autofocus (left)”
+      </dd>
+    </dl>
+      <h2 align="middle">Part 2: Tracing Rays through Lenses</h2>
+	<h4 align="middle">Task 1: A simple focus metric - variance</h4>
+
+	<dl>
+		<dt>LensCamera::focus_metric</dt>
+		<dd>This function iterates through an image buffer’s data members and calculates the variance of each color channel, then adds them to get the focus metric. Image patches that are sharper (less out of focus) will have higher variance, and blurrier (more out of focus) ones will have lower variance. This is because variance can detect contrast among pixels in the image patches, and an image patch where there is higher contrast and variability among its pixels is sharper. </dd>
+	</dl>
+  	<h4 align="middle">Task 2: Autofocus search</h4>
+  	<dl>
+		<dt>LensCamera::autofocus</dt>
+		<dd>This function estimates the depth where the image patch has the highest focus metric (i.e. is the sharpest). This is done by stepping through sensor depths from infinity_focus to near_focus, and calculating the focus metric at each sensor depth. If the focus metric is higher than the previous best focus metric, we update the best focus metric and best sensor depth. At the end, we set the camera’s sensor depth to the sensor depth that had the best focus metric. Our step size is sqrt(36*36 + 24*24) / sqrt(screenW*screenW + screenH*screenH). This is because we want the maximum size of the circle of confusion to be &lt= the size of one pixel.
+</dd>
+	</dl>
+  <p> Here are the results from using autofocus.
+  <dl>
+	<dt>Parameters for the below examples:</dt>
+	<dd>number of camera rays per pixel = 16        <br>
+number of samples per area light = 16        <br>
+maximum ray depth = 6        <br>
+width and height of output image = 480 * 360        <br>
+	</dd>
+	</dl>
+	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/1_noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 1: No autofocus<br>(infinity_focus=51.2609mm, near_focus=63.4656mm)</figcaption>
+			</td>
+			<td>
+			  <img src="images/1_af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 1: Autofocus<br>(best sensor depth=54.1484mm)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+  <br>
+ 	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/2_noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 2: No autofocus<br>(infinity_focus=28.7632mm, near_focus=34.5059mm)</figcaption>
+			</td>
+			<td>
+			  <img src="images/2_af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 2: Autofocus<br>(best sensor depth=29.2882mm)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+  <br>
+ 	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/3_noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 3: No autofocus<br>(infinity_focus=188.758mm, near_focus=258.268mm)</figcaption>
+			</td>
+			<td>
+			  <img src="images/3_af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 3: Autofocus<br>(best sensor depth=255.733mm)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+  <br>
+ 	<div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/4_noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 4: No autofocus<br>(infinity_focus=28.7399mm, near_focus=32.0639mm)</figcaption>
+			</td>
+			<td>
+			  <img src="images/4_af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 4: Autofocus<br>(best sensor depth=28.8149)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+ 	<dl>
+    <br>
+		<dt>Things that we learned in part 2:</dt>
+    <br>
+		<dd>1. At first, we used a large image patch for autofocus, but it was very slow and difficult to generate the result, since the process of calculating the focus metric involved a large number of pixels. Then, we chose image patches that were much smaller than before, and this largely reduced the amount of time it took to generate the result.
+    <br><br>
+    2. We also learned how to choose the small image patch for autofocus. Since our autofocus algorithm is contrast-based, it means that in order to produce a good result, the image patch that we choose needs to have a high contrast, otherwise the difference between the focus metric of a sharp image patch and a blurry one will not be obvious. To ensure that the contrast is high, we chose the image patches at places that have object edges.
+    </dd>
+  </dl>
+  <br>
+      <h2 align="middle">Part 3: Faster contrast-based autofocus</h2>
+   	<dl>
+		<dt>Adjustments to the search algorithm:</dt>
+		<dd>Because focus improves as we approach the correct image depth and degrades as we move away, we implemented a check that breaks out of the autofocus function if we go 8 steps without updating with a newly found best sensor depth again, based on the focus metric. While this adjustment does not necessarily find the global best sensor depth, it does usually find a sensor depth where the image is reasonably sharp. Since we start from infinity_focus when stepping through all the sensor depths, this adjustment will reduce a larger amount of time if the best sensor depth is closer to infinity_focus (rather than close to near_focus), because it helps cut the time when the sensor depth is becoming farther away from the best sensor depth.
+ </dd>
+    </dl>
+       	<dl>
+     <dt>Adjustments to the focus metric:</dt>
+		<dd>We are planning to implement the Sum-Modified Laplacian metric, which is considered to be more robust than our current focus metric that uses variance, from this paper on <a href=https://www1.cs.columbia.edu/CAVE/publications/pdfs/Nayar_CVPR92.pdf>Shape from Focus</a>.
+ </dd>
+	</dl>
+  <br>
+        <h2 align="middle">Part 4: Updated plan for additional improvements to our project
+</h2>
+   	<dl>
+		<dt>1. Add acceleration algorithms about sampling and BVH to make the rendering process faster. <br>
+2. Create a more sophisticated pixel sampler that generates jittered samples.
+</dt>
+	</dl>
+</body>
+
+</html>
