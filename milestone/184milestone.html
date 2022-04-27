@@ -181,7 +181,7 @@
 		<dd>This function estimates the depth where the image patch has the highest focus metric (i.e. is the sharpest). This is done by stepping through sensor depths from infinity_focus to near_focus, and calculating the focus metric at each sensor depth. If the focus metric is higher than the previous best focus metric, we update the best focus metric and best sensor depth. At the end, we set the camera’s sensor depth to the sensor depth that had the best focus metric. Our step size is sqrt(36*36 + 24*24) / sqrt(screenW*screenW + screenH*screenH). This is because we want the maximum size of the circle of confusion to be &lt= the size of one pixel.
 </dd>
 	</dl>
-  <p> Here are the results from using autofocus.
+  <p> Here are the results from using autofocus. Since the original images using lens 2 and lens 4 are too small, we also included images that are zoomed in before rendering as well as images from different angles. In our result, for those images that were already sharp before autofocus, the effect of autofocus is not very obvious; but for those images that were blurry at first, our implementation of autofocus made the images much sharper and more in focus.
   <dl>
 	<dt>Parameters for the below examples:</dt>
 	<dd>number of camera rays per pixel = 16        <br>
@@ -220,6 +220,36 @@ width and height of output image = 480 * 360        <br>
 		</table>
 	  </div>
   <br>
+  <div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/2-zoom-noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 2: No autofocus (zoomed in)</figcaption>
+			</td>
+			<td>
+			  <img src="images/2-zoom-af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 2: Autofocus (zoomed in)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+  <br>
+  <div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/2-rotate-noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 2: No autofocus (from a different angle)</figcaption>
+			</td>
+			<td>
+			  <img src="images/2-rotate-af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 2: Autofocus (from a different angle)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+  <br>  
  	<div align="middle">
 		<table style="width=100%">
 		  <tr>
@@ -249,6 +279,37 @@ width and height of output image = 480 * 360        <br>
 			</tr>
 		</table>
 	  </div>
+  <br>
+  <div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/4-zoom-noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 4: No autofocus (zoomed in)</figcaption>
+			</td>
+			<td>
+			  <img src="images/4-zoom-af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 4: Autofocus (zoomed in)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+    <br>
+    <div align="middle">
+		<table style="width=100%">
+		  <tr>
+			<td>
+			  <img src="images/4-rotate-noaf.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 4: No autofocus (from a different angle)</figcaption>
+			</td>
+			<td>
+			  <img src="images/4-rotate-af.png" align="middle" width="400px" />
+			  <figcaption align="middle">Lens 4: Autofocus (from a different angle)</figcaption>
+			</td>
+			</tr>
+		</table>
+	  </div>
+    
  	<dl>
     <br>
 		<dt>Things that we learned in part 2:</dt>
